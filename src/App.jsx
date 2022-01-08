@@ -1,12 +1,16 @@
+import React from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+
 import { initializeApp } from 'firebase/app'
 import { firebaseConfig } from './firebase'
 
 import Home from './components/Home'
-import SignIn from './auth/SignIn'
+import Navbar from './components/Navbar'
+import CreateGuitar from './components/CreateGuitar'
+import UserProfile from './components/UserProfile'
 
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { getAuth } from 'firebase/auth'
-import SignOut from './auth/SignOut'
 
 // init firebase app
 initializeApp(firebaseConfig)
@@ -16,11 +20,35 @@ const auth = getAuth()
 function App() {
   const [user] = useAuthState(auth)
   return (
-    <div className='App'>
-      <h1>Guitar Trading App</h1>
-      <SignOut />
-      <section>{user ? <Home /> : <SignIn />}</section>
-    </div>
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route
+          path='/'
+          element={
+            <div>
+              <Home />
+            </div>
+          }
+        />
+        <Route
+          path='/postguitar'
+          element={
+            <div>
+              <CreateGuitar />
+            </div>
+          }
+        />
+        <Route
+          path='/userprofile'
+          element={
+            <div>
+              <UserProfile />
+            </div>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
