@@ -39,6 +39,9 @@ const CreateGuitar = () => {
 
   // let lastId = []
 
+  // ? something like this..
+  //const q = query(userColRef, doc(where, 'uid', '==', auth.currentUser.uid))
+
   useEffect(() => {
     let guitars = []
     let users = []
