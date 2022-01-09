@@ -2,7 +2,20 @@ import React, { useEffect, useState } from 'react'
 import { firebaseConfig } from '../firebase'
 import { initializeApp } from 'firebase/app'
 
-import { addDoc, collection, getFirestore } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  getFirestore,
+  query,
+  where,
+  onSnapshot,
+  serverTimestamp,
+  orderBy
+} from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
 
 //initialize firebase
@@ -14,15 +27,40 @@ const auth = getAuth()
 const userColRef = collection(db, 'users')
 const guitarsColRef = collection(db, 'guitars')
 
+const guitarQuery = query(guitarsColRef, orderBy('createdAt'))
+
+//query
+// const currentUserDocQuery = query(
+//   collection(userColRef),
+//   where('uid', '==', auth.currentUser.uid)
+// )
+
 const CreateGuitar = () => {
   const [userCred, setUserCred] = useState({})
   const [brand, setBrand] = useState('')
   const [model, setModel] = useState('')
   const [rrp, setRrp] = useState(0)
+  const [dbGuitars, setDbGuitars] = useState([])
+  const [lastGuitarId, setLastGuitarId] = useState([])
+
+  // let lastId = []
 
   useEffect(() => {
+    let guitars = []
     setUserCred(auth.currentUser)
+    onSnapshot(guitarQuery, (snapshot) => {
+      snapshot.docs.forEach((doc) => {
+        guitars.push({ ...doc.data(), id: doc.id })
+      })
+      setDbGuitars(guitars)
+      console.log('from array', guitars)
+      setLastGuitarId(guitars.slice(-1)[0].id)
+    })
   }, [])
+
+  console.log(lastGuitarId)
+
+  //console.log(dbGuitars.slice(-1)[0].id)
 
   const handleGuitarFormSubmit = (e) => {
     e.preventDefault()
@@ -36,7 +74,8 @@ const CreateGuitar = () => {
       model: guitarFormData.model,
       rrp: guitarFormData.rrp,
       isAvailableForTrade: true,
-      createdBy: auth.currentUser.uid
+      createdBy: auth.currentUser.uid,
+      createdAt: serverTimestamp()
     }).then(() => {
       setBrand('')
       setModel('')
