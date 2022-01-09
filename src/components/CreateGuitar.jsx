@@ -28,39 +28,42 @@ const userColRef = collection(db, 'users')
 const guitarsColRef = collection(db, 'guitars')
 
 const guitarQuery = query(guitarsColRef, orderBy('createdAt'))
-
-//query
-// const currentUserDocQuery = query(
-//   collection(userColRef),
-//   where('uid', '==', auth.currentUser.uid)
-// )
+const usersQuery = query(userColRef)
 
 const CreateGuitar = () => {
   const [userCred, setUserCred] = useState({})
   const [brand, setBrand] = useState('')
   const [model, setModel] = useState('')
   const [rrp, setRrp] = useState(0)
-  const [dbGuitars, setDbGuitars] = useState([])
   const [lastGuitarId, setLastGuitarId] = useState([])
 
   // let lastId = []
 
+  // ? something like this..
+  //const q = query(userColRef, doc(where, 'uid', '==', auth.currentUser.uid))
+
   useEffect(() => {
     let guitars = []
+    let users = []
     setUserCred(auth.currentUser)
     onSnapshot(guitarQuery, (snapshot) => {
       snapshot.docs.forEach((doc) => {
         guitars.push({ ...doc.data(), id: doc.id })
       })
-      setDbGuitars(guitars)
-      console.log('from array', guitars)
       setLastGuitarId(guitars.slice(-1)[0].id)
+      console.log('guitars id', guitars)
+    })
+    onSnapshot(usersQuery, (snapshot) => {
+      snapshot.docs.forEach((doc) => {
+        users.push({ ...doc.data(), id: doc.id })
+      })
+      console.log('users id', users)
     })
   }, [])
 
-  console.log(lastGuitarId)
+  // ! find a way not to get doc id without hard-coding
 
-  //console.log(dbGuitars.slice(-1)[0].id)
+  const userDocRef = doc(db, 'users', 'QJHTof1azjTnovIuhryA')
 
   const handleGuitarFormSubmit = (e) => {
     e.preventDefault()
@@ -81,6 +84,10 @@ const CreateGuitar = () => {
       setModel('')
       setRrp(0)
       console.log('new guitar added to db 🤖')
+      updateDoc(userDocRef, {
+        //! want to add new id to array of ids, not overwrite
+        guitarsPosted: lastGuitarId
+      })
     })
   }
 

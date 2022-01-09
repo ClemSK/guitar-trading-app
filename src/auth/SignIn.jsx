@@ -12,7 +12,8 @@ import {
   addDoc,
   collection,
   getFirestore,
-  serverTimestamp
+  serverTimestamp,
+  updateDoc
 } from 'firebase/firestore'
 
 initializeApp(firebaseConfig)
